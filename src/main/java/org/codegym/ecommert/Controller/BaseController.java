@@ -1,4 +1,4 @@
-package org.codegym.ecommert;
+package org.codegym.ecommert.Controller;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -6,7 +6,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-public class BaseServlet extends HttpServlet {
+public class BaseController extends HttpServlet {
     protected void pageNotFound(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setStatus(HttpServletResponse.SC_NOT_FOUND);
         PrintWriter writer = response.getWriter();

@@ -1,16 +1,16 @@
 package org.codegym.ecommert;
 
+import org.codegym.ecommert.Controller.BaseController;
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.Writer;
 
 @WebServlet(name = "HomeServlet", urlPatterns = {"/admin/home/*"})
-public class HomeServlet extends BaseServlet {
+public class HomeServlet extends BaseController {
     @Override
     public void init() throws ServletException {
         super.init();
