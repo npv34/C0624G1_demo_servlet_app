@@ -8,6 +8,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class UserService {
@@ -18,24 +21,86 @@ public class UserService {
         this.userModel = new UserModel();
     }
 
-    public void showPageUserList(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    public void showPageUserList(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, SQLException {
         // get all users from model
-        List<User> users = userModel.getAllUser();
+        ResultSet data = userModel.getAllUser();
+        List<User> users = new ArrayList<>();
+
+        while (data.next()){
+            int id = data.getInt("id");
+            String username = data.getString("username");
+            String password = data.getString("password");
+            String role = data.getString("role");
+
+            User user = new User(id, username, password, role);
+            users.add(user);
+        }
+
         // set data vao request de truyen xuong jsp
         request.setAttribute("data", users);
 
-        // forward request to user.jsp
-        RequestDispatcher requestDispatcher = request.getRequestDispatcher("/views/user.jsp");
+        // forward request to list.jsp
+        RequestDispatcher requestDispatcher = request.getRequestDispatcher("/views/users/list.jsp");
         requestDispatcher.forward(request, response);
     }
 
-    public void deleteUser(HttpServletRequest request, HttpServletResponse response) throws ServletException{
+    public void deleteUser(HttpServletRequest request, HttpServletResponse response) throws ServletException, SQLException, IOException {
         int id = Integer.parseInt(request.getParameter("id"));
-        User useDelete = userModel.findUserById(id);
-        userModel.deleteUser(useDelete);
+        userModel.deleteUser(id);
+        response.sendRedirect(request.getContextPath() + "/admin/users");
     }
 
-    public void showPageAddUser(HttpServletRequest request, HttpServletResponse response) {
-
+    public void showPageAddUser(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        // forward request to list.jsp
+        RequestDispatcher requestDispatcher = request.getRequestDispatcher("/views/users/create.jsp");
+        requestDispatcher.forward(request, response);
     }
+
+    public void showPageUpdateUser(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, SQLException {
+        // get user update tu database
+        int id = Integer.parseInt(request.getParameter("id"));
+        User userUpdate = this.getUserById(id);
+        // forward request to list.jsp
+        request.setAttribute("user", userUpdate);
+        RequestDispatcher requestDispatcher = request.getRequestDispatcher("/views/users/update.jsp");
+        requestDispatcher.forward(request, response);
+    }
+
+    public void createUser(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
+        // get data from form
+        String username = request.getParameter("username");
+        String password = request.getParameter("password");
+        String role = request.getParameter("role");
+
+        User user = new User(username, password, role);
+        userModel.addUser(user);
+        // redirect to list user page
+        response.sendRedirect(request.getContextPath() + "/admin/users");
+    }
+
+    public void updateUser(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
+        // get data from form
+        int id = Integer.parseInt(request.getParameter("id"));
+        String username = request.getParameter("username");
+        String password = request.getParameter("password");
+        String role = request.getParameter("role");
+
+        User user = new User(id, username, password, role);
+        userModel.updateUser(user);
+        // redirect to list user page
+        response.sendRedirect(request.getContextPath() + "/admin/users");
+    }
+
+    public User getUserById(int id) throws SQLException {
+        ResultSet resultSet = userModel.findUserById(id);
+        User user = null;
+        while (resultSet.next()) {
+            String username = resultSet.getString("username");
+            String password = resultSet.getString("password");
+            String role = resultSet.getString("role");
+            user = new User(id, username, password, role);
+        }
+        return user;
+    }
+
 }
