@@ -22,8 +22,23 @@ public class UserService {
     }
 
     public void showPageUserList(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, SQLException {
-        // get all users from model
-        ResultSet data = userModel.getAllUser();
+        String keyword = request.getParameter("keyword");
+        ResultSet data = null;
+        int totalItemOfPage = 2;
+
+        String page = request.getParameter("page");
+        int offset = 0;
+        if (page != null) {
+            offset = totalItemOfPage * (Integer.parseInt(page) - 1);
+        }
+
+        if (keyword != null) {
+            data = userModel.findUserByUserName(keyword, totalItemOfPage, offset);
+        } else {
+            // get all users from model
+            data = userModel.getAllUser(totalItemOfPage, offset);
+        }
+
         List<User> users = new ArrayList<>();
 
         while (data.next()){
@@ -31,13 +46,20 @@ public class UserService {
             String username = data.getString("username");
             String password = data.getString("password");
             String role = data.getString("role");
-
             User user = new User(id, username, password, role);
             users.add(user);
         }
+        // Tinh so luong trang
+        int totalUser = userModel.getTotalUser();
+        if (keyword != null) {
+            totalUser = users.size();
+        }
+        int totalPage = totalUser % totalItemOfPage == 0 ? totalUser / totalItemOfPage : totalUser / totalItemOfPage + 1;
 
         // set data vao request de truyen xuong jsp
         request.setAttribute("data", users);
+        request.setAttribute("totalPage", totalPage);
+        request.setAttribute("currentPage", page);
 
         // forward request to list.jsp
         RequestDispatcher requestDispatcher = request.getRequestDispatcher("/views/users/list.jsp");

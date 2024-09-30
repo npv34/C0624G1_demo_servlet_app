@@ -15,14 +15,31 @@ public class UserModel {
         connection = Database.getConnection();
     }
 
-    public ResultSet getAllUser() throws SQLException {
+    public ResultSet getAllUser(int limit, int offset) throws SQLException {
         // viet sql
-        String sql = "SELECT * FROM users";
+        String sql = "SELECT * FROM users LIMIT ? Offset ?";
+        // dua cau lenh truy van
+        PreparedStatement statement = connection.prepareStatement(sql);
+        // thay the du lieu vao cau lenh
+        statement.setInt(1, limit);
+        statement.setInt(2, offset);
+        // thu hien truy van
+        ResultSet resultSet = statement.executeQuery();
+        return resultSet;
+    }
+
+    public int getTotalUser() throws SQLException {
+        // viet sql
+        String sql = "SELECT COUNT(*) as totalUser FROM users";
         // dua cau lenh truy van
         PreparedStatement statement = connection.prepareStatement(sql);
         // thu hien truy van
         ResultSet resultSet = statement.executeQuery();
-        return resultSet;
+        int totalUser = 0;
+        while (resultSet.next()) {
+             totalUser = resultSet.getInt("totalUser");
+        }
+        return totalUser;
     }
 
     public void deleteUser(int id) throws SQLException {
@@ -70,5 +87,18 @@ public class UserModel {
         // thu hien truy van
         ResultSet resultSet = statement.executeQuery();
         return resultSet;
+    }
+
+    public ResultSet findUserByUserName(String username, int limit, int offset) throws SQLException {
+        // viet sql
+        String sql = "SELECT * FROM users WHERE username LIKE ? LIMIT ? offset ?";
+        // dua cau lenh truy van
+        PreparedStatement statement = connection.prepareStatement(sql);
+        // thay the id vao cau lenh
+        statement.setString(1, "%" + username + "%");
+        statement.setInt(2, limit);
+        statement.setInt(3, offset);
+        // thu hien truy van
+        return statement.executeQuery();
     }
 }
